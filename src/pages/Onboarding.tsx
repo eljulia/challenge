@@ -23,11 +23,13 @@ const Onboarding = () => {
   const { toast } = useToast();
   const [prefs, setPrefs] = useState(defaultPrefs);
   const [saving, setSaving] = useState(false);
+  const [existingDisplayName, setExistingDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPrefs = async () => {
       if (!user?.id) return;
-      const { data } = await supabase.from("profiles").select("preferences").eq("id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("preferences, display_name").eq("id", user.id).maybeSingle();
+      if (data?.display_name) setExistingDisplayName(data.display_name);
       const existing = data?.preferences as any;
       if (existing?.challengeMode) {
         setPrefs({
@@ -75,7 +77,7 @@ const Onboarding = () => {
         .from("profiles")
         .upsert({
           id: user.id,
-          display_name: user.email?.split("@")[0] || "Demo User",
+          display_name: existingDisplayName || user.email?.split("@")[0] || "Demo User",
           preferences,
           updated_at: new Date().toISOString(),
         });
