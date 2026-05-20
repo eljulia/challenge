@@ -49,7 +49,7 @@ const Dashboard = () => {
     if (!profile) return;
     setRedeeming(true);
     try {
-      const targetProfileId = leaderboard[0]?.id || profile.id;
+      const targetProfileId = profile.id;
       const nextPoints = profile.current_month_points - redeemAmount;
 
       const { error } = await supabase
