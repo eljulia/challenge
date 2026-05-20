@@ -174,7 +174,7 @@ BEGIN
     updated_at = now()
   WHERE token = p_token AND is_active = true;
   
-  GET DIAGNOSTICS token_found = FOUND;
+  token_found := FOUND;
   
   -- Log the error reason if provided
   IF token_found AND p_error_reason IS NOT NULL THEN

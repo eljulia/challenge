@@ -7,9 +7,8 @@ DROP POLICY IF EXISTS "Allow public read access to basic profile info for rankin
 -- Create restrictive policy for public rankings that only exposes safe fields
 CREATE POLICY "Public access to safe profile fields for rankings" 
 ON public.profiles 
-FOR SELECT 
-USING (true)
-WITH CHECK (false);
+FOR SELECT
+USING (true);
 
 -- Update the existing policy to be more restrictive - only allow specific safe columns
 -- We'll use a security definer function to control exactly what data is exposed

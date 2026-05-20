@@ -23,39 +23,44 @@ FOR SELECT
 USING (true);
 
 -- 2. Add Missing RLS Policies for notification_events
-CREATE POLICY "Service role can manage notification events" 
-ON public.notification_events 
-FOR ALL 
+DROP POLICY IF EXISTS "Service role can manage notification events" ON public.notification_events;
+CREATE POLICY "Service role can manage notification events"
+ON public.notification_events
+FOR ALL
 USING (auth.role() = 'service_role'::text)
 WITH CHECK (auth.role() = 'service_role'::text);
 
-CREATE POLICY "Users can view their own notification events" 
-ON public.notification_events 
-FOR SELECT 
+DROP POLICY IF EXISTS "Users can view their own notification events" ON public.notification_events;
+CREATE POLICY "Users can view their own notification events"
+ON public.notification_events
+FOR SELECT
 USING (
   EXISTS (
-    SELECT 1 FROM public.profiles p 
-    WHERE p.id = auth.uid() 
+    SELECT 1 FROM public.profiles p
+    WHERE p.id = auth.uid()
     AND (payload->>'user_id')::uuid = p.id
   )
 );
 
--- 3. Add Missing RLS Policies for user_notifications  
-CREATE POLICY "Users can view their own notifications" 
-ON public.user_notifications 
-FOR SELECT 
+-- 3. Add Missing RLS Policies for user_notifications
+DROP POLICY IF EXISTS "Users can view their own notifications" ON public.user_notifications;
+CREATE POLICY "Users can view their own notifications"
+ON public.user_notifications
+FOR SELECT
 USING (profile_id = auth.uid());
 
-CREATE POLICY "Service role can manage user notifications" 
-ON public.user_notifications 
-FOR ALL 
+DROP POLICY IF EXISTS "Service role can manage user notifications" ON public.user_notifications;
+CREATE POLICY "Service role can manage user notifications"
+ON public.user_notifications
+FOR ALL
 USING (auth.role() = 'service_role'::text)
 WITH CHECK (auth.role() = 'service_role'::text);
 
 -- 4. Add Missing RLS Policies for specialized-extraction
-CREATE POLICY "Service role can manage specialized extraction" 
-ON public."specialized-extraction" 
-FOR ALL 
+DROP POLICY IF EXISTS "Service role can manage specialized extraction" ON public."specialized-extraction";
+CREATE POLICY "Service role can manage specialized extraction"
+ON public."specialized-extraction"
+FOR ALL
 USING (auth.role() = 'service_role'::text)
 WITH CHECK (auth.role() = 'service_role'::text);
 
