@@ -35,6 +35,7 @@ supabase/.branches/
 
 # Claude Code workspace artifacts
 .claude/
+CLAUDE.md
 PLAN.md
 .playwright-mcp/
 _notes/
