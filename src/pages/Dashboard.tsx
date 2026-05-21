@@ -49,6 +49,7 @@ const Dashboard = () => {
     if (!profile) return;
     setRedeeming(true);
     try {
+      // [ES] Bug #2: el original usaba leaderboard[0].id, descontando puntos del líder en lugar del usuario autenticado
       const targetProfileId = profile.id;
       const nextPoints = profile.current_month_points - redeemAmount;
 
@@ -63,6 +64,7 @@ const Dashboard = () => {
       toast({ title: "Points redeemed", description: `${redeemAmount} points were redeemed.` });
       loadDashboard();
     } catch (err: unknown) {
+      // [ES] err tipado como unknown para forzar verificación de tipo antes de acceder a .message
       toast({
         variant: "destructive",
         title: "Redeem failed",

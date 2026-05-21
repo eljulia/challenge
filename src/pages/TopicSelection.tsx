@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+// [ES] Tipo explícito para evitar que el array quede tipado como any[] y oculte errores de columna
 type ArticleRow = {
   id: string;
   title: string;
@@ -68,6 +69,7 @@ const TopicSelection = () => {
     );
   }, [articles, query]);
 
+  // [ES] if/else en lugar de ternario porque setState con lógica de mutación no ejecuta side-effects correctamente con operador condicional
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -134,6 +136,7 @@ const TopicSelection = () => {
           {visibleArticles.map((article, index) => {
             const checked = selectedIds.has(article.id);
             const saved = savedIds.has(article.id);
+            // [ES] Bug #1: brokenExtractTitle ignoraba el artículo y devolvía "Article N+1"; ahora usa article.title directamente
             const displayTitle = article.title;
 
             return (
