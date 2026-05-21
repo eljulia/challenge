@@ -87,7 +87,8 @@ const GeneratedPosts = () => {
       const { data, error } = await supabase.functions.invoke("generate-posts", {
         body: { article_id: articleId, user_id: user.id },
       });
-      if (error) throw error;
+      // [ES] FunctionsHttpError no extiende Error; normalizar antes del catch para que el mensaje del servidor llegue al toast
+      if (error) throw new Error(error.message ?? String(error));
       if (!data?.post?.id) throw new Error("The fake generator did not return a post.");
       toast({ title: "Post generated", description: "The fake Edge Function saved a draft post." });
       await loadData();
@@ -105,6 +106,7 @@ const GeneratedPosts = () => {
 
   const saveEdit = async () => {
     if (!editingPost) return;
+    // [ES] Bug #3: la versión original mostraba el toast de éxito sin llamar a Supabase; el cambio se perdía al recargar
     await supabase.from("posts").update({ content: draft }).eq("id", editingPost.id);
     setEditingPost(null);
     const { data } = await supabase.from("posts").select("id, content, ai_content, article_id, status, scheduled_for, articles:article_id(id, title, url, summary, imageurl)").eq("user_id", user!.id).order("created_at", { ascending: false });
@@ -207,6 +209,7 @@ const GeneratedPosts = () => {
               <CardContent className="space-y-3">
                 {scheduled.length === 0 && <p className="text-sm text-muted-foreground">No scheduled posts yet.</p>}
                 {scheduled.map((post) => {
+                  // [ES] Bug #4: el original leía post.articles?.image_url pero la columna en DB se llama imageurl (sin guion bajo)
                   const imageUrl = post.articles?.imageurl;
                   return (
                     <div key={post.id} className="border rounded-md overflow-hidden">

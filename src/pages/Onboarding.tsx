@@ -32,6 +32,7 @@ const Onboarding = () => {
   const { toast } = useToast();
   const [prefs, setPrefs] = useState(defaultPrefs);
   const [saving, setSaving] = useState(false);
+  // [ES] Bug #5: se guarda el display_name existente para no sobreescribirlo con el prefijo del email en cada upsert
   const [existingDisplayName, setExistingDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ const Onboarding = () => {
         .from("profiles")
         .upsert({
           id: user.id,
+          // [ES] Usa el nombre guardado en DB; el email como fallback solo aplica si el perfil es completamente nuevo
           display_name: existingDisplayName || user.email?.split("@")[0] || "Demo User",
           preferences,
           updated_at: new Date().toISOString(),

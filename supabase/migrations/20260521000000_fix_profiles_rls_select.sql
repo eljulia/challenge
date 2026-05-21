@@ -1,3 +1,5 @@
+-- [ES] Bug #6: la política original restringía SELECT a auth.uid() = id, impidiendo que el leaderboard
+-- leyera filas de otros usuarios; se reemplaza por una política permisiva para el rol authenticated.
 -- Allow all authenticated users to read profiles (required for leaderboard).
 -- The previous policy restricted SELECT to auth.uid() = id, which blocked
 -- the leaderboard query from returning other users' rows.
