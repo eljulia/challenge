@@ -13,28 +13,6 @@ Descubri articulos, genera posts para LinkedIn con IA simulada y gestiona tu cal
 
 </div>
 
----
-
-## Capturas de pantalla
-
-| Login | Dashboard |
-|---|---|
-| ![Login](./docs/login.png) | ![Dashboard](./docs/dashboard.png) |
-
-| Busqueda de topicos | Posts generados |
-|---|---|
-| ![Topics](./docs/topics.png) | ![Generated Posts](./docs/generated-posts.png) |
-
-<div align="center">
-
-**Perfil de usuario**
-
-![Profile](./docs/profile.png)
-
-</div>
-
----
-
 ## Que se hizo en este reto
 
 Este repositorio es la solucion al reto tecnico de Castleberry Media. La tarea fue identificar, corregir y documentar bugs intencionales en una aplicacion React + Supabase que simula el producto KOL.
@@ -142,7 +120,7 @@ Si PowerShell bloquea `npm`:
 npm.cmd run dev
 ```
 
-La aplicacion corre en **`http://localhost:8080`** (no en el puerto 5173 por defecto de Vite — el puerto esta configurado en `vite.config.ts`).
+La aplicacion corre en **`http://localhost:8080`**.
 
 ---
 
@@ -151,7 +129,6 @@ La aplicacion corre en **`http://localhost:8080`** (no en el puerto 5173 por def
 | Servicio | URL |
 |---|---|
 | Aplicacion | `http://localhost:8080` |
-| Supabase API | `http://127.0.0.1:54321` |
 | Supabase Studio | `http://127.0.0.1:54323` |
 
 ---
@@ -198,3 +175,26 @@ Ver [SOLUTION.md](./SOLUTION.md) para la descripcion completa en español de:
 - Que cambios se realizaron y por que
 - Como se probo el flujo completo
 - Que mejorarias adicionales se harian con mas tiempo
+
+---
+
+## Capturas de pantalla
+
+| Login | Dashboard |
+|---|---|
+| ![Login](./docs/login.png) | ![Dashboard](./docs/dashboard.png) |
+
+| Busqueda de topicos | Posts generados |
+|---|---|
+| ![Topics](./docs/topics.png) | ![Generated Posts](./docs/generated-posts.png) |
+
+<div align="center">
+
+**Perfil de usuario**
+
+![Profile](./docs/profile.png)
+
+</div>
+
+---
+
