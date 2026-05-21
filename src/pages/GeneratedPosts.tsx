@@ -87,7 +87,7 @@ const GeneratedPosts = () => {
       const { data, error } = await supabase.functions.invoke("generate-posts", {
         body: { article_id: articleId, user_id: user.id },
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message ?? String(error));
       if (!data?.post?.id) throw new Error("The fake generator did not return a post.");
       toast({ title: "Post generated", description: "The fake Edge Function saved a draft post." });
       await loadData();
