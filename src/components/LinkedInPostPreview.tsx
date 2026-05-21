@@ -243,7 +243,7 @@ export function LinkedInPostPreview({
     // 2) Marcado ligero: **negrita**, *itálica*
     formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     formattedContent = formattedContent.replace(
-      /(?<!\*)\*([^\*]+)\*(?!\*)/g,
+      /(?<!\*)\*([^*]+)\*(?!\*)/g,
       "<i>$1</i>"
     );
 

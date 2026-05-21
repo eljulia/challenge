@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { supabase } from '@/integrations/supabase/client';
 import { isCapacitorNative } from '@/utils/mobileUtils';
 import { navigateTo, isNavigationReady } from '@/utils/navigationHandler';

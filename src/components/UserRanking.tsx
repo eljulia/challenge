@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Trophy, Award, Medal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";

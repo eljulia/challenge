@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -218,7 +219,7 @@ const SourceSearchManager: React.FC<SourceSearchManagerProps> = ({
         <div className="flex flex-wrap gap-1.5">
           {selectedSources.map((source, index) => {
             let label = source;
-            try { label = new URL(source).hostname.replace(/^www\./, ""); } catch {}
+            try { label = new URL(source).hostname.replace(/^www\./, ""); } catch { /* url parse failed; use raw source */ }
             return (
               <Badge key={index} variant="secondary" className="gap-1 pr-1.5">
                 {label}

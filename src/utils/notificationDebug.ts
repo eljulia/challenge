@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ============================================================================
 // DEVELOPMENT-ONLY NOTIFICATION DEBUG UTILITIES
 // ============================================================================

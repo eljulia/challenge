@@ -9,6 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+type ChallengePreferences = {
+  challengeMode?: boolean;
+  preferredTopics?: string[];
+  contentTone?: string;
+  postingFrequency?: string;
+  targetAudience?: string;
+  industry?: string;
+};
+
 const defaultPrefs = {
   preferredTopics: "AI marketing, founder storytelling",
   contentTone: "Practical",
@@ -30,7 +39,7 @@ const Onboarding = () => {
       if (!user?.id) return;
       const { data } = await supabase.from("profiles").select("preferences, display_name").eq("id", user.id).maybeSingle();
       if (data?.display_name) setExistingDisplayName(data.display_name);
-      const existing = data?.preferences as any;
+      const existing = data?.preferences as ChallengePreferences | null;
       if (existing?.challengeMode) {
         setPrefs({
           preferredTopics: (existing.preferredTopics || []).join(", "),
@@ -85,11 +94,11 @@ const Onboarding = () => {
       if (error) throw error;
       toast({ title: "Preferences saved", description: "Your demo profile is ready." });
       navigate("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         variant: "destructive",
         title: "Could not save preferences",
-        description: err.message || "Try again after checking your local Supabase setup.",
+        description: err instanceof Error ? err.message : "Try again after checking your local Supabase setup.",
       });
     } finally {
       setSaving(false);

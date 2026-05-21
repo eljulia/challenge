@@ -62,11 +62,11 @@ const Dashboard = () => {
       setProfile({ ...profile, current_month_points: nextPoints });
       toast({ title: "Points redeemed", description: `${redeemAmount} points were redeemed.` });
       loadDashboard();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         variant: "destructive",
         title: "Redeem failed",
-        description: err.message || "Unable to redeem points.",
+        description: err instanceof Error ? err.message : "Unable to redeem points.",
       });
     } finally {
       setRedeeming(false);

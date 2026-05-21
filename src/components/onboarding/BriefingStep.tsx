@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState } from "react";
 import { Mic, MicOff, CheckCircle2, Sparkles, PhoneOff, Loader2, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";

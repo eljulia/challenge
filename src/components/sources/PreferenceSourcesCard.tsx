@@ -108,7 +108,7 @@ const PreferenceSourcesCard: React.FC<PreferenceSourcesCardProps> = ({
               let hostname = source;
               try {
                 hostname = new URL(source).hostname.replace(/^www\./, "");
-              } catch {}
+              } catch { /* url parse failed; use raw source */ }
 
               return (
                 <div

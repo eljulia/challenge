@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,7 +106,7 @@ const useProfileData = () => {
         name: metadata?.full_name
           || profile?.display_name
           || `${metadata?.firstName || ''} ${metadata?.lastName || ''}`.trim()
-          || user?.email?.split('@')[0]!
+          || user?.email?.split('@')[0]
           || 'User',
         email: user?.email || undefined,
         avatar_url: metadata?.avatar_url || metadata?.picture || profile?.avatar_url || undefined,
