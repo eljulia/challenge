@@ -105,7 +105,10 @@ const GeneratedPosts = () => {
 
   const saveEdit = async () => {
     if (!editingPost) return;
+    await supabase.from("posts").update({ content: draft }).eq("id", editingPost.id);
     setEditingPost(null);
+    const { data } = await supabase.from("posts").select("id, content, ai_content, article_id, status, scheduled_for, articles:article_id(id, title, url, summary, imageurl)").eq("user_id", user!.id).order("created_at", { ascending: false });
+    if (data) setPosts(data as any[]);
     toast({ title: "Changes saved", description: "Your edit has been saved." });
   };
 
