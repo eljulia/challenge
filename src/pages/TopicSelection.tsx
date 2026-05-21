@@ -22,9 +22,6 @@ type ArticleRow = {
   sources?: { name?: string | null } | null;
 };
 
-const brokenExtractTitle = (_article: ArticleRow, index: number) => {
-  return `Article ${index + 1}`;
-};
 
 const TopicSelection = () => {
   const { user } = useAuth();
@@ -133,7 +130,7 @@ const TopicSelection = () => {
           {visibleArticles.map((article, index) => {
             const checked = selectedIds.has(article.id);
             const saved = savedIds.has(article.id);
-            const displayTitle = brokenExtractTitle(article, index);
+            const displayTitle = article.title;
 
             return (
               <Card key={article.id} className={checked ? "border-primary" : ""}>
