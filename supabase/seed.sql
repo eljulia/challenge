@@ -11,7 +11,14 @@ insert into auth.users (
   created_at,
   updated_at,
   raw_app_meta_data,
-  raw_user_meta_data
+  raw_user_meta_data,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  email_change_token_current,
+  phone_change_token,
+  reauthentication_token
 ) values
   (
     '00000000-0000-0000-0000-0000000000a1',
@@ -24,7 +31,8 @@ insert into auth.users (
     now(),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Demo User A"}'
+    '{"full_name":"Demo User A"}',
+    '', '', '', '', '', '', ''
   ),
   (
     '00000000-0000-0000-0000-0000000000b2',
@@ -37,7 +45,8 @@ insert into auth.users (
     now(),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Demo User B"}'
+    '{"full_name":"Demo User B"}',
+    '', '', '', '', '', '', ''
   ),
   (
     '00000000-0000-0000-0000-0000000000c3',
@@ -50,12 +59,20 @@ insert into auth.users (
     now(),
     now(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Demo User C"}'
+    '{"full_name":"Demo User C"}',
+    '', '', '', '', '', '', ''
   )
 on conflict (id) do update set
   email = excluded.email,
   encrypted_password = excluded.encrypted_password,
   raw_user_meta_data = excluded.raw_user_meta_data,
+  confirmation_token = '',
+  recovery_token = '',
+  email_change_token_new = '',
+  email_change = '',
+  email_change_token_current = '',
+  phone_change_token = '',
+  reauthentication_token = '',
   updated_at = now();
 
 insert into auth.identities (

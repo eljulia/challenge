@@ -36,24 +36,39 @@ TO authenticated, anon
 USING (bucket_id <> 'images');
 
 -- 3) Lock search_path on functions missing it (linter fix, no behavior change).
-ALTER FUNCTION public.setup_cron_extensions() SET search_path = public;
-ALTER FUNCTION public.get_week_start(date) SET search_path = public;
-ALTER FUNCTION public.ensure_user_streak(uuid) SET search_path = public;
-ALTER FUNCTION public.handle_updated_at() SET search_path = public;
-ALTER FUNCTION public.create_publish_posts_cron_job() SET search_path = public;
-ALTER FUNCTION public.trigger_daily_streak_checker() SET search_path = public;
-ALTER FUNCTION public.schedule_linkedin_token_maintenance() SET search_path = public;
-ALTER FUNCTION public.enable_push_notifications(uuid) SET search_path = public;
-ALTER FUNCTION public.disable_push_notifications(uuid) SET search_path = public;
-ALTER FUNCTION public.get_push_registration_status(uuid) SET search_path = public;
-ALTER FUNCTION public."trigger-fetch-ses-news"() SET search_path = public;
-ALTER FUNCTION public.trigger_publish_scheduled_posts() SET search_path = public;
-ALTER FUNCTION public.publish_scheduled_posts() SET search_path = public;
-ALTER FUNCTION public.trigger_delete_old_articles() SET search_path = public;
-ALTER FUNCTION public.ensure_user_goal(uuid) SET search_path = public;
-ALTER FUNCTION public.touch_updated_at() SET search_path = public;
-ALTER FUNCTION public.update_profile_current_month_points() SET search_path = public;
-ALTER FUNCTION public.trigger_extract_sources() SET search_path = public;
-ALTER FUNCTION public.trigger_specialized_fetch() SET search_path = public;
-ALTER FUNCTION public.schedule_publish_posts_cron() SET search_path = public;
-ALTER FUNCTION public.trigger_fetch_trusted_articles() SET search_path = public;
+-- Wrapped in DO block: skips functions that don't exist in this local environment.
+DO $$
+DECLARE
+  sigs text[] := ARRAY[
+    'setup_cron_extensions()',
+    'get_week_start(date)',
+    'ensure_user_streak(uuid)',
+    'handle_updated_at()',
+    'create_publish_posts_cron_job()',
+    'trigger_daily_streak_checker()',
+    'schedule_linkedin_token_maintenance()',
+    'enable_push_notifications(uuid)',
+    'disable_push_notifications(uuid)',
+    'get_push_registration_status(uuid)',
+    '"trigger-fetch-ses-news"()',
+    'trigger_publish_scheduled_posts()',
+    'publish_scheduled_posts()',
+    'trigger_delete_old_articles()',
+    'ensure_user_goal(uuid)',
+    'touch_updated_at()',
+    'update_profile_current_month_points()',
+    'trigger_extract_sources()',
+    'trigger_specialized_fetch()',
+    'schedule_publish_posts_cron()',
+    'trigger_fetch_trusted_articles()'
+  ];
+  sig text;
+BEGIN
+  FOREACH sig IN ARRAY sigs LOOP
+    BEGIN
+      EXECUTE 'ALTER FUNCTION public.' || sig || ' SET search_path = public';
+    EXCEPTION WHEN undefined_function OR undefined_object THEN
+      NULL;
+    END;
+  END LOOP;
+END $$;

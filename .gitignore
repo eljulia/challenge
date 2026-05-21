@@ -28,3 +28,13 @@ SOLUTIONS.md
 *.sw?
 ios/App.xcworkspace/
 ios/App.xcworkspace/
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# Claude Code workspace artifacts
+.claude/
+PLAN.md
+.playwright-mcp/
+_notes/
