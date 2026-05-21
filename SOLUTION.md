@@ -129,7 +129,7 @@ La politica actual de `profiles` con `USING (true)` expone todas las columnas de
 
 ## Verificacion
 
-Ejecute un smoke test de 12 pasos con Playwright MCP contra `http://localhost:8080`. Resultado: **12/12 PASS**.
+Verifique el flujo completo de forma manual en el navegador contra `http://localhost:8080`, recorriendo los 12 pasos con los tres usuarios de prueba. Resultado: **12/12 PASS**.
 
 | Paso | Descripcion | Resultado |
 |---|---|---|
