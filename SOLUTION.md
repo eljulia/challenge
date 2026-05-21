@@ -1,149 +1,149 @@
-# SOLUTION.md — KOL Candidate Challenge
-
-## Summary
-
-I identified and fixed 6 bugs across 5 files. All fixes were verified end-to-end with an automated 12-step Playwright smoke test (12/12 PASS). Each fix is isolated in its own PR with a linked GitHub Issue.
+# SOLUTION.md — Reto tecnico KOL (Castleberry Media)
 
 ---
 
-## Bugs Found and Fixed
+## Que identifique
 
-### Bug 1 — Article titles not displayed (High)
+Recorri el flujo completo de la aplicacion con los tres usuarios de prueba y detecte 6 bugs distribuidos en 5 archivos. A continuacion describo cada uno con su causa raiz y el comportamiento observado antes del fix.
 
-**File:** `src/pages/TopicSelection.tsx` lines 25-27, 136
+### Bug 1 — Titulos de articulos incorrectos (Alta severidad)
 
-**Problem:** A function called `brokenExtractTitle(_article, index)` ignored the `_article` parameter entirely and returned `"Article " + (index + 1)`. Every card showed a generic title like "Article 1", "Article 2", making articles indistinguishable.
+**Archivo:** `src/pages/TopicSelection.tsx` lineas 25-27 y 136
 
-**Fix:** Removed `brokenExtractTitle` and its `ArticleRow` type stub. Added an explicit `ArticleRow` type derived from the actual Supabase columns. On line 140, replaced the function call with `article.title` directly.
+La funcion `brokenExtractTitle(_article, index)` ignoraba el parametro `_article` y retornaba la cadena `"Article " + (index + 1)`. Cada tarjeta mostraba un titulo generico como "Article 1", "Article 2", sin importar el contenido real del articulo en la base de datos. Esto hace imposible distinguir los articulos entre si.
 
-**PR:** [#5](../../pull/5) `fix(topics): use article.title directly, remove brokenExtractTitle`
+### Bug 2 — Redencion de puntos afecta al usuario equivocado (Alta severidad)
 
----
+**Archivo:** `src/pages/Dashboard.tsx` linea 52
 
-### Bug 2 — Points deducted from wrong user (High)
+`redeemPoints()` usaba `leaderboard[0].id` como objetivo del `UPDATE` en Supabase. Esto descontaba puntos del usuario que estaba primero en el leaderboard, no del usuario autenticado. Si el usuario actual no era el lider, su balance no cambiaba nunca y se corrompia el puntaje de otra persona.
 
-**File:** `src/pages/Dashboard.tsx` line 52
+### Bug 3 — Las ediciones de posts no se guardan (Severidad media)
 
-**Problem:** `redeemPoints()` used `leaderboard[0].id` as the target for the Supabase `UPDATE`. This deducted points from whoever was at the top of the leaderboard, not from the authenticated user. If the current user was not ranked first, their own balance never changed.
+**Archivo:** `src/pages/GeneratedPosts.tsx` lineas 107-114
 
-**Fix:** Replaced `leaderboard[0].id` with `profile.id`, which holds the current user's profile loaded at mount.
+`saveEdit()` mostraba un toast de exito pero no llamaba a ningun metodo de escritura en Supabase. El texto editado existia solo en el estado local de React. Al recargar la pagina, el post revertia al contenido original generado por la Edge Function.
 
-**PR:** [#7](../../pull/7) `fix(dashboard): deduct points from current user not leaderboard leader`
+### Bug 4 — Imagen del post programado siempre en blanco (Severidad media)
 
----
+**Archivo:** `src/pages/GeneratedPosts.tsx` linea 213
 
-### Bug 3 — Post edits not persisted (Medium)
+El preview del post programado leia `post.articles?.image_url` (con guion bajo). El nombre real de la columna en la base de datos es `imageurl` (sin guion bajo), segun el esquema de Supabase. La propiedad siempre era `undefined` y el espacio de imagen renderizaba un placeholder gris.
 
-**File:** `src/pages/GeneratedPosts.tsx` lines 107-114
+### Bug 5 — display_name sobreescrito en cada guardado de preferencias (Severidad media)
 
-**Problem:** `saveEdit()` displayed a success toast but never called `supabase.from("posts").update(...)`. The edited text existed only in local React state. On any page reload the post reverted to the original AI-generated content.
+**Archivo:** `src/pages/Onboarding.tsx` linea 91
 
-**Fix:** Added `await supabase.from("posts").update({ content: draft }).eq("id", editingPost.id)` before closing the dialog. After the update, refetches posts from the DB so local state reflects what was actually saved.
+El `upsert` en `savePreferences()` siempre calculaba `display_name` como `user.email.split("@")[0]`. Si el usuario ya tenia un nombre guardado en la base de datos, cada vez que guardaba sus preferencias ese nombre era reemplazado por el prefijo del email (por ejemplo, `"demoa"`).
 
-**PR:** [#9](../../pull/9) `fix(posts): persist post edits to database before closing dialog`
+### Bug 6 — Leaderboard solo muestra al usuario actual (RLS Supabase)
 
----
+**Archivo:** `supabase/migrations/20260521000000_fix_profiles_rls_select.sql`
 
-### Bug 4 — Scheduled post image always blank (Medium)
-
-**File:** `src/pages/GeneratedPosts.tsx` line 213
-
-**Problem:** The scheduled post preview read `post.articles?.image_url` (camelCase with underscore). The actual column name in the Supabase schema is `imageurl` (no underscore). The value was always `undefined`, so the image slot rendered a grey placeholder instead of the article cover.
-
-**Fix:** Changed `image_url` to `imageurl` to match the DB column name.
-
-**PR:** [#11](../../pull/11) `fix(posts): use correct imageurl column name in scheduled post preview`
+La politica RLS de SELECT en la tabla `profiles` tenia la condicion `USING (auth.uid() = id)`. Postgres filtra silenciosamente las filas que no cumplen la politica, por lo que la consulta del leaderboard en `Dashboard.tsx` (que pide los top 5 perfiles ordenados por puntos) solo retornaba la fila del usuario autenticado. Los otros 4 lugares del leaderboard quedaban vacios.
 
 ---
 
-### Bug 5 — Display name overwritten on every onboarding save (Medium)
+## Que cambios realize
 
-**File:** `src/pages/Onboarding.tsx` line 91
+Cada bug se corrigio en una rama separada con su propio issue y PR en GitHub.
 
-**Problem:** The `upsert` in `savePreferences()` always set `display_name` to `user.email.split("@")[0]`. Even if the user had a custom name stored in the DB, saving preferences again silently replaced it with the email prefix (e.g., `"demoa"`).
+### Bug 1 — `src/pages/TopicSelection.tsx`
 
-**Fix:** Added a `existingDisplayName` state variable that loads the current `display_name` from the DB on mount. The upsert now uses `existingDisplayName || user.email.split("@")[0]`, so the email fallback only applies when no name exists yet.
+- Elimine la funcion `brokenExtractTitle` y su tipo parcial.
+- Defini un tipo explicito `ArticleRow` con las columnas reales de la tabla `articles`.
+- En la linea 140 reemplace la llamada a la funcion por `article.title` directamente.
 
-**PR:** [#2](../../pull/2) `fix(onboarding): preserve existing display_name on preferences save`
+### Bug 2 — `src/pages/Dashboard.tsx`
+
+- En `redeemPoints()`, cambie `leaderboard[0].id` por `profile.id`.
+- `profile` se carga al montar el componente con `SELECT ... WHERE id = user.id`, por lo que siempre contiene el perfil del usuario autenticado.
+
+### Bug 3 — `src/pages/GeneratedPosts.tsx`
+
+- Agregue `await supabase.from("posts").update({ content: draft }).eq("id", editingPost.id)` antes de cerrar el dialog.
+- Despues del `update`, recargo los posts desde Supabase para que el estado local refleje lo que realmente quedo guardado en la base de datos.
+
+### Bug 4 — `src/pages/GeneratedPosts.tsx`
+
+- Cambie `post.articles?.image_url` por `post.articles?.imageurl` para que coincida con el nombre real de la columna.
+
+### Bug 5 — `src/pages/Onboarding.tsx`
+
+- Agregue el estado `existingDisplayName` que carga el `display_name` actual desde la base de datos al montar el componente.
+- En el `upsert`, use `existingDisplayName || user.email.split("@")[0] || "Demo User"`. El prefijo del email solo se usa como fallback cuando no existe ningun nombre previo.
+
+### Bug 6 — Nueva migracion SQL
+
+- Cree `supabase/migrations/20260521000000_fix_profiles_rls_select.sql`.
+- La migracion elimina la politica restrictiva y crea `"Authenticated users can read all profiles"` con `USING (true)` limitada al rol `authenticated`.
+- Las politicas de escritura (`INSERT`, `UPDATE`, `DELETE`) permanecen con `auth.uid() = id` para proteger los datos de cada usuario.
+
+### Mejora de calidad adicional
+
+- En `GeneratedPosts.tsx`, normalice el error de `supabase.functions.invoke`: `FunctionsHttpError` no extiende `Error`, por lo que agrege `throw new Error(error.message ?? String(error))` inmediatamente despues de detectar el error. Esto garantiza que el mensaje del servidor llega al toast en lugar de perderse.
 
 ---
 
-### Bug 6 — Leaderboard only shows current user (Supabase RLS)
+## Por que tome esas decisiones
 
-**File:** `supabase/migrations/20260521000000_fix_profiles_rls_select.sql`
+**Minima superficie de cambio.** Cada fix toca exactamente las lineas responsables del bug sin refactorizar codigo adyacente. Esto reduce el riesgo de introducir regresiones y hace que cada PR sea facil de revisar.
 
-**Problem:** The RLS policy on `profiles` for SELECT was `USING (auth.uid() = id)`. This meant every query could only return the row belonging to the authenticated user. The leaderboard query in `Dashboard.tsx` requests top 5 profiles ordered by points, but Postgres silently filtered out all other users' rows, returning only 1 result.
+**RLS con migracion SQL en lugar de RPC.** Pude haber creado una funcion `get_leaderboard()` con `SECURITY DEFINER` para saltear RLS, pero eso habria ocultado el problema en lugar de resolverlo. La migracion es la solucion correcta: ajusta la politica al comportamiento que el producto realmente necesita (leer perfiles ajenos para el ranking) mientras mantiene las escrituras protegidas.
 
-**Fix:** Added a new migration that drops the restrictive policy and creates `"Authenticated users can read all profiles"` with `USING (true)` scoped to the `authenticated` role. Write operations (`INSERT`, `UPDATE`, `DELETE`) remain protected by `auth.uid() = id`.
+**Estado derivado de la base de datos para `display_name`.** En lugar de agregar un campo de formulario para que el usuario escriba su nombre, preservo el nombre que ya esta en la base de datos. Esto no rompe el flujo existente ni agrega complejidad al formulario de onboarding.
 
-**PR:** [#14](../../pull/14) `fix(rls): allow authenticated users to read all profiles for leaderboard`
+**Recarga post-guardado en `saveEdit`.** Despues de actualizar el post, recargo los datos desde Supabase en lugar de actualizar el estado local manualmente. Esto garantiza coherencia entre lo que el usuario ve y lo que hay en la base de datos, y cubre casos borde como errores parciales de escritura.
 
----
-
-## Bonus — FunctionsHttpError normalization
-
-**File:** `src/pages/GeneratedPosts.tsx` line 91
-
-`FunctionsHttpError` (thrown by `supabase.functions.invoke`) does not extend the native `Error` class. If it was passed directly to the `catch` block and accessed as `err.message`, the server-side error message was silently dropped. Added `throw new Error(error.message ?? String(error))` immediately after a failed `invoke` call to normalize it before the catch handler runs.
-
-**PR:** [#13](../../pull/13)
+**Normalizacion de `FunctionsHttpError`.** El SDK de Supabase lanza un tipo de error propio que no hereda de `Error`. Normalizar al `catch` hace que el manejo de errores sea predecible para cualquier desarrollador que trabaje en este codigo en el futuro.
 
 ---
 
-## How I Tested
+## Que mejoraria si tuviera mas tiempo
 
-### Automated E2E — Playwright MCP (12/12 PASS)
+### 1. Manejo de errores mas granular en todas las paginas
 
-A 12-step smoke test was executed against `http://localhost:8080` using the Playwright MCP browser automation tool. Each step was verified with a browser snapshot or screenshot.
+Actualmente la mayoria de los errores se capturan con un `catch (err: unknown)` generico y se muestran en un toast. Implementaria codigos de error diferenciados: errores de red vs. errores de validacion vs. errores de permisos, con mensajes especificos para cada caso y, donde tenga sentido, un boton de reintento.
 
-| Step | Description | Result |
+### 2. Estados de carga por accion, no por pagina
+
+El loading state actual bloquea toda la pantalla mientras se cargan los datos iniciales. Usaria skeleton loaders por tarjeta o por seccion para que el usuario vea la estructura de la UI mientras los datos llegan. Esto mejora la percepcion de velocidad sin cambiar el tiempo real de carga.
+
+### 3. Validacion de formularios con `react-hook-form` y `zod`
+
+El formulario de Onboarding no tiene validacion del lado del cliente mas alla de los atributos HTML nativos. Agregaria esquemas de validacion con `zod` y manejos de error por campo para dar feedback inmediato antes de llamar a Supabase.
+
+### 4. Optimistic updates en la redencion de puntos y en la edicion de posts
+
+Actualmente el usuario tiene que esperar la respuesta de Supabase para ver el cambio reflejado. Implementaria optimistic updates: actualizar el estado local inmediatamente y revertir si la operacion falla. Esto hace que la UI se sienta instantanea.
+
+### 5. Tests de integracion con Playwright
+
+El flujo de 12 pasos se verifico manualmente con Playwright MCP durante el desarrollo. Lo formalizaria como una suite de tests automatizados que corra en CI para prevenir regresiones en cada PR.
+
+### 6. Politica RLS mas granular para el leaderboard
+
+La politica actual de `profiles` con `USING (true)` expone todas las columnas del perfil a cualquier usuario autenticado. Con mas tiempo crearia una vista materializada `leaderboard_view` que exponga solo `display_name` y `current_month_points`, y restringiria el SELECT directo a `profiles` para que cada usuario solo vea su propia fila completa.
+
+---
+
+## Verificacion
+
+Ejecute un smoke test de 12 pasos con Playwright MCP contra `http://localhost:8080`. Resultado: **12/12 PASS**.
+
+| Paso | Descripcion | Resultado |
 |---|---|---|
-| 1 | Login as demo.a | PASS |
-| 2 | Dashboard loads with points and leaderboard | PASS |
-| 3 | Redeem points deducts from current user | PASS |
-| 4 | Leaderboard shows 3 distinct users | PASS |
-| 5 | Article cards show real titles from DB | PASS |
-| 6 | Article selection persists after reload | PASS |
-| 7 | Post generation via Edge Function creates a draft | PASS |
-| 8 | Edited post text persists after page reload | PASS |
-| 9 | Scheduled post preview shows article image | PASS |
-| 10 | display_name preserved after onboarding save | PASS |
-| 11 | Profile page shows email, preferences, and points | PASS |
-| 12 | Logout clears session and redirects to /login | PASS |
+| 1 | Login como demo.a | PASS |
+| 2 | Dashboard carga con puntos y leaderboard | PASS |
+| 3 | Redencion descuenta del usuario actual | PASS |
+| 4 | Leaderboard muestra 3 usuarios distintos | PASS |
+| 5 | Tarjetas de articulos muestran titulos reales | PASS |
+| 6 | Seleccion de articulos persiste al recargar | PASS |
+| 7 | Generacion de post via Edge Function crea un draft | PASS |
+| 8 | Texto editado persiste despues de recargar | PASS |
+| 9 | Preview programado muestra imagen del articulo | PASS |
+| 10 | display_name se preserva despues de guardar preferencias | PASS |
+| 11 | Pagina de perfil muestra email, preferencias y puntos | PASS |
+| 12 | Logout borra la sesion y redirige a /login | PASS |
 
-### Manual verification
-
-Each bug was reproduced manually before fixing to confirm the root cause. After each fix, the affected flow was verified in the browser before committing.
-
-### Build and lint
-
-```powershell
-npm run lint   # 0 errors
-npm run build  # 0 errors, 0 warnings
-```
-
----
-
-## Pull Requests (in merge order)
-
-| PR | Branch | Description |
-|---|---|---|
-| [#2](../../pull/2) | `fix/5-onboarding-display-name` | Bug 5 — display_name preserved |
-| [#5](../../pull/5) | `fix/1-article-titles` | Bug 1 — real article titles |
-| [#7](../../pull/7) | `fix/2-redeem-points` | Bug 2 — points deducted from correct user |
-| [#9](../../pull/9) | `fix/3-save-edit` | Bug 3 — post edits persisted to DB |
-| [#11](../../pull/11) | `fix/4-scheduled-image` | Bug 4 — correct imageurl column |
-| [#13](../../pull/13) | `fix/functions-http-error` | Bonus — FunctionsHttpError normalization |
-| [#14](../../pull/14) | `fix/6-rls-profiles` | Bug 6 — leaderboard RLS policy |
-| [#15](../../pull/15) | `chore/quality-pass` | Lint clean, build clean, Spanish inline comments |
-
----
-
-## Security Checklist
-
-- No `.env` files committed
-- No production Supabase URL or `service_role` key in the codebase
-- No real LinkedIn OAuth credentials
-- No paid API keys
-- No real user or customer data
-- File `SOLUTIONS.md` (plural) is in `.gitignore` — only `SOLUTION.md` (singular) exists
+Ademas: `npm run lint` y `npm run build` sin errores ni advertencias.
