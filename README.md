@@ -1,220 +1,200 @@
-# Technical Challenge
+<div align="center">
 
-This repository contains a simplified version of the product with intentional issues.
+# KOL — Reto Tecnico Castleberry Media
 
-Your task is to run the app locally, identify the issues, fix them, and demonstrate that the main product flow works end to end.
+**Plataforma de contenido para lideres de negocio**  
+Descubri articulos, genera posts para LinkedIn con IA simulada y gestiona tu calendario editorial.
 
-You do not need a hosted Supabase project. This challenge runs against local Supabase using Docker and the Supabase CLI.
+[![Estado](https://img.shields.io/badge/estado-listo%20para%20revision-brightgreen?style=flat-square)](.)
+[![Bugs corregidos](https://img.shields.io/badge/bugs%20corregidos-6%2F6-blue?style=flat-square)](./SOLUTION.md)
+[![Smoke test](https://img.shields.io/badge/smoke%20test-12%2F12%20PASS-success?style=flat-square)](./SOLUTION.md)
+[![Lint](https://img.shields.io/badge/lint-0%20errores-success?style=flat-square)](.)
+[![Build](https://img.shields.io/badge/build-sin%20errores-success?style=flat-square)](.)
 
-## Product Areas
+</div>
 
-You should investigate and validate these areas:
+---
 
-1. Onboarding and preference saving.
-2. Dashboard scoring and point redemption.
-3. Search Topics and article extraction/display.
-4. Saving selected articles.
-5. Fake API-backed post generation through a Supabase Edge Function.
-6. Generated post editing.
-7. Fake LinkedIn scheduling and scheduled preview.
-8. Simplified Profile page.
+## Capturas de pantalla
 
-The app should feel like a small real product, but all data and integrations are synthetic.
+| Login | Dashboard |
+|---|---|
+| ![Login](./docs/login.png) | ![Dashboard](./docs/dashboard.png) |
 
-## Expected Working Flow
+| Busqueda de topicos | Posts generados |
+|---|---|
+| ![Topics](./docs/topics.png) | ![Generated Posts](./docs/generated-posts.png) |
 
-By the end of your fix, a user should be able to:
+<div align="center">
 
-1. Sign in as a seeded demo user.
-2. Complete onboarding and save preferences.
-3. Refresh the app without losing preferences.
-4. View the dashboard and use points safely.
-5. Search/load demo articles.
-6. Save selected articles to Supabase.
-7. Generate a post from a saved article using the fake Edge Function.
-8. Edit generated post content and see the saved result.
-9. Schedule the post locally.
-10. View a scheduled post preview with correct article context.
-11. Open the original article from the preview.
-12. View email, preferences, points, and fake LinkedIn status on Profile.
+**Perfil de usuario**
 
-## Prerequisites
+![Profile](./docs/profile.png)
 
-Install these before starting:
+</div>
 
-- Node.js and npm
-- Docker Desktop
-- Supabase CLI
+---
+
+## Que se hizo en este reto
+
+Este repositorio es la solucion al reto tecnico de Castleberry Media. La tarea fue identificar, corregir y documentar bugs intencionales en una aplicacion React + Supabase que simula el producto KOL.
+
+Se encontraron y corrigieron **6 bugs** que afectaban areas criticas del producto: logica de puntos, visualizacion de datos, persistencia, politicas de seguridad en Supabase y onboarding de usuarios.
+
+Cada bug tiene su propio issue y PR en GitHub con el razonamiento detras del fix. Ver [SOLUTION.md](./SOLUTION.md) para la documentacion completa en español.
+
+---
+
+## Bugs encontrados y corregidos
+
+| # | Area | Severidad | Descripcion breve |
+|---|---|---|---|
+| 1 | Visualizacion de articulos | 🔴 Alta | `brokenExtractTitle()` ignoraba el articulo y retornaba "Article 1", "Article 2" en lugar del titulo real |
+| 2 | Logica de puntos | 🔴 Alta | `redeemPoints()` descontaba del lider del leaderboard, no del usuario autenticado |
+| 3 | Persistencia de posts | 🟡 Media | `saveEdit()` mostraba toast de exito pero nunca llamaba a Supabase `update` |
+| 4 | Preview de posts programados | 🟡 Media | Leia `image_url` (con guion bajo) pero la columna en DB se llama `imageurl` — imagen siempre en blanco |
+| 5 | Onboarding | 🟡 Media | `upsert` sobreescribia `display_name` con el prefijo del email en cada guardado |
+| 6 | RLS / Leaderboard | 🟠 RLS | Politica SELECT en `profiles` con `auth.uid() = id` bloqueaba filas ajenas — leaderboard mostraba solo 1 fila |
+
+---
+
+## Flujo principal (verificado)
+
+```
+Login → Dashboard → Search Topics → Guardar articulos
+     → Generar post (Edge Function) → Editar → Programar
+     → Preview con imagen → Perfil → Logout
+```
+
+Todos los pasos verificados manualmente en el navegador con los tres usuarios de prueba.
+
+---
+
+## Stack
+
+| Capa | Tecnologia |
+|---|---|
+| Frontend | React 18, TypeScript 5.5, Vite 5 (SWC) |
+| UI | shadcn/ui (Radix UI), Tailwind CSS 3.4 |
+| Routing | React Router 6 |
+| Backend | Supabase (PostgreSQL + Auth + RLS + Edge Functions) |
+| Runtime Edge | Deno (supabase/functions) |
+
+---
+
+## Requisitos previos
+
+- [Node.js](https://nodejs.org/) con npm
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (debe estar corriendo antes de usar Supabase)
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
 - Git
 
-Docker Desktop must be running before you run Supabase commands.
+---
 
-## Local Setup
+## Como correr en local
 
-### macOS / Linux
-
-```bash
-npm install
-cp .env.example .env.local
-supabase start
-```
-
-After `supabase start`, copy the printed local anon key into `.env.local`:
-
-```bash
-VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_ANON_KEY=<paste local anon key here>
-```
-
-Then reset and run:
-
-```bash
-supabase db reset
-supabase functions serve
-npm run dev
-```
-
-### Windows PowerShell
+### 1. Instalar dependencias
 
 ```powershell
 npm install
+```
+
+### 2. Configurar variables de entorno
+
+```powershell
 Copy-Item .env.example .env.local
+```
+
+### 3. Iniciar Supabase
+
+```powershell
 supabase start
 ```
 
-After `supabase start`, copy the printed local anon key into `.env.local`:
+Copia la clave `anon key` que imprime el comando y pegala en `.env.local`:
 
 ```env
 VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_ANON_KEY=<paste local anon key here>
+VITE_SUPABASE_ANON_KEY=<pegar aqui la anon key>
 ```
 
-Then reset and run:
+### 4. Cargar datos de prueba
 
 ```powershell
 supabase db reset
+```
+
+### 5. Iniciar Edge Functions (terminal separada)
+
+```powershell
 supabase functions serve
+```
+
+### 6. Iniciar la aplicacion
+
+```powershell
 npm run dev
 ```
 
-If PowerShell blocks `npm`, use:
+Si PowerShell bloquea `npm`:
 
 ```powershell
 npm.cmd run dev
 ```
 
-### Windows Command Prompt
+La aplicacion corre en **`http://localhost:8080`** (no en el puerto 5173 por defecto de Vite — el puerto esta configurado en `vite.config.ts`).
 
-```bat
-npm install
-copy .env.example .env.local
-supabase start
-```
+---
 
-After `supabase start`, copy the printed local anon key into `.env.local`:
+## URLs locales
 
-```env
-VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_ANON_KEY=<paste local anon key here>
-```
+| Servicio | URL |
+|---|---|
+| Aplicacion | `http://localhost:8080` |
+| Supabase API | `http://127.0.0.1:54321` |
+| Supabase Studio | `http://127.0.0.1:54323` |
 
-Then reset and run:
+---
 
-```bat
-supabase db reset
-supabase functions serve
-npm run dev
-```
+## Usuarios de prueba
 
-## Synthetic Data
+| Email | Password | Puntos iniciales |
+|---|---|---|
+| `demo.a@example.test` | `Challenge123!` | 120 |
+| `demo.b@example.test` | `Challenge123!` | 60 |
+| `demo.c@example.test` | `Challenge123!` | 0 |
 
-The local database is seeded from:
+Ejecutar `supabase db reset` para restaurar los datos originales en cualquier momento.
 
-```txt
-supabase/seed.sql
-```
+---
 
-Running `supabase db reset` reloads the synthetic users, profiles, article sources, articles, points, and preferences.
+## Datos sinteticos
 
-Demo users:
+La base de datos se carga desde `supabase/seed.sql`. Incluye usuarios, perfiles, fuentes de articulos, articulos y puntos. Todas las integraciones (LinkedIn, generacion de IA) son simuladas.
 
-- `demo.a@example.test` / `Challenge123!`
-- `demo.b@example.test` / `Challenge123!`
-- `demo.c@example.test` / `Challenge123!`
+- La Edge Function `generate-posts` construye el texto del post desde el contenido del articulo sin llamar a ningun API externo.
+- El flujo de programacion guarda el estado solo en Supabase local.
+- LinkedIn login retorna `{ success: false }` de forma intencional.
 
-## Useful Local URLs
+---
 
-Supabase will print the exact local URLs after `supabase start`. Common defaults are:
+## Seguridad
 
-- App: `http://localhost:8080` (Vite is configured to use port 8080, not the default 5173)
-- Supabase API: `http://127.0.0.1:54321`
-- Supabase Studio: `http://127.0.0.1:54323`
+Antes de revisar el repositorio, se verifico:
 
-## Notes
+- Sin archivos `.env` commiteados
+- Sin URL de Supabase productivo
+- Sin `service_role` key en el codigo
+- Sin credenciales reales de LinkedIn ni APIs de pago
+- Sin datos reales de usuarios o clientes
 
-- Do not use real API keys.
-- Do not connect to the real LinkedIn API.
-- Do not connect to a production Supabase project.
-- The post generation function is intentionally fake but should behave like a real API-backed flow.
-- The scheduling flow is fake and should only save scheduled posts locally/Supabase.
+---
 
-## Candidate Deliverables
+## Documentacion de la solucion
 
-You have read-only access to this repository.
+Ver [SOLUTION.md](./SOLUTION.md) para la descripcion completa en español de:
 
-To submit your solution:
-
-1. Clone this repository.
-2. Create your own private GitHub repository with your fixed solution.
-3. Add `sebastian.serna@castleberrymedia.co` and `david.romero@castleberrymedia.co` as a collaborator so we can review the code.
-4. Share the repository link with us.
-5. Include the code changes needed to fix the challenge.
-6. Include a short `SOLUTION.md` file explaining:
-   - Which issues you found.
-   - What you changed.
-   - How you tested the app.
-7. Include a short demo video showing the main flow working.
-
-It's not mandatory to deploy the app.
-
-The app needs to work locally using Supabase CLI and Docker.
-
-## Use of AI Tools
-
-You may use AI tools during this challenge.
-
-However, your submission must demonstrate that you understood the codebase, the bugs, and the reasoning behind your fixes.
-
-Using AI-generated code without understanding it is not considered a strong submission.
-
-We will evaluate the reasoning behind your solution, not just whether the final code runs.
-
-## Evaluation Criteria
-
-- 20% Onboarding and preferences save correctly
-- 20% Dashboard points logic works correctly
-- 20% Article extraction/display and saving works
-- 20% Fake post generation, edit, and schedule flow works
-- 10% Supabase/Auth/RLS/Edge Function understanding
-- 10% Code quality, debugging explanation, and setup clarity
-
-Bonus:
-
-- Clean error handling
-- Good loading states
-- Clear database structure
-- Good comments explaining fake API behavior
-- Optional Capacitor/mobile verification
-
-## Security Rules
-
-Before submitting, verify:
-
-- No real secrets are committed
-- No `.env` files are committed
-- No production Supabase URL is included
-- No service role key exists
-- No real user/customer data exists
-- No real LinkedIn OAuth flow is active
-- No paid API key is required
-- No private internal assets remain
+- Que se identifico en cada bug
+- Que cambios se realizaron y por que
+- Como se probo el flujo completo
+- Que mejorarias adicionales se harian con mas tiempo
