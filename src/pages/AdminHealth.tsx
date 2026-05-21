@@ -66,7 +66,7 @@ export default function AdminHealth() {
 
   useEffect(() => {
     if (isSuperAdmin) load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isSuperAdmin]);
 
   if (roleLoading || !isSuperAdmin) {

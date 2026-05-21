@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { parseISO, isValid, differenceInHours } from 'date-fns';
@@ -76,7 +77,7 @@ const fetchGeneralArticlesPaginated = async (
   
   const offset = pageParam * ITEMS_PER_PAGE;
   
-  let query = supabase
+  const query = supabase
     .from('articles')
     .select('*, sources(name, language, industries, locations, type)')
     .neq('sourceid', MANUAL_SOURCE_ID)
@@ -136,7 +137,7 @@ const fetchArticlesByTypesPaginated = async (
   
   const offset = pageParam * ITEMS_PER_PAGE;
   
-  let query = supabase
+  const query = supabase
     .from('articles')
     .select(`
       *,

@@ -150,7 +150,7 @@ export function ArticleCard({
                     ${isSelected ? "border-primary/70 dark:border-primary/60 shadow-md" : ""}`;
 
   let badgeClasses = "text-xs font-medium";
-  let badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
+  const badgeVariant: "default" | "secondary" | "destructive" | "outline" = "secondary";
   let sourceName = article.sourceName || article.source;
 
   // Check if this is a "specific" source and should display "keyword"

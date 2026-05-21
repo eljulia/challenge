@@ -49,7 +49,7 @@ const TopicSelection = () => {
       toast({ variant: "destructive", title: "Could not load articles", description: articleError.message });
     }
 
-    setArticles((articleData as any[]) || []);
+    setArticles((articleData as ArticleRow[]) || []);
     setSavedIds(new Set((savedData || []).map((row) => row.article_id)));
     setLoading(false);
   };
@@ -71,7 +71,11 @@ const TopicSelection = () => {
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
@@ -92,8 +96,8 @@ const TopicSelection = () => {
       setSavedIds((prev) => new Set([...Array.from(prev), ...Array.from(selectedIds)]));
       setSelectedIds(new Set());
       toast({ title: "Articles saved", description: "Saved articles are ready for post generation." });
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Save failed", description: err.message || "Unable to save articles." });
+    } catch (err: unknown) {
+      toast({ variant: "destructive", title: "Save failed", description: err instanceof Error ? err.message : "Unable to save articles." });
     } finally {
       setSaving(false);
     }

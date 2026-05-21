@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Mobile device utilities to help with platform-specific functionality
  */

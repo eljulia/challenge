@@ -7,10 +7,26 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+type ProfilePreferences = {
+  preferredTopics?: string[];
+  keywords?: string[];
+  contentTone?: string;
+  postingFrequency?: string;
+  targetAudience?: string;
+  industry?: string;
+  industries?: string[];
+};
+
+type ProfileRow = {
+  display_name: string | null;
+  preferences: ProfilePreferences | null;
+  current_month_points: number;
+};
+
 const Profile = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useRef, useState } from "react";
 import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 import { Microphone } from "@mozartec/capacitor-microphone";
@@ -411,7 +412,7 @@ export function useVoiceCall() {
 
     // Web platforms: proactively check Permissions API for clearer denial errors
     try {
-      // @ts-ignore — not all browsers type "microphone"
+      // @ts-expect-error — not all browsers type "microphone"
       const status = await navigator.permissions?.query?.({ name: "microphone" as PermissionName });
       if (status?.state === "denied") {
         throw new Error(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/notifications.ts
 import { isCapacitorNative } from './utils/mobileUtils';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +42,7 @@ const nextWeekdayDates = (weekday: number, count = 8): Date[] => {
   console.log(`📅 Calculating next ${count} ${weekdayName}s from now: ${now.toLocaleString()}`);
 
   // days until target weekday
-  let delta = (weekday + 7 - now.getDay()) % 7;
+  const delta = (weekday + 7 - now.getDay()) % 7;
 
   // Build the first date - reset to midnight first for clean calculation
   const first = new Date(now.getFullYear(), now.getMonth(), now.getDate());

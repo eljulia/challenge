@@ -69,8 +69,8 @@ const GeneratedPosts = () => {
       toast({ variant: "destructive", title: "Could not load posts", description: postsError.message });
     }
 
-    setSavedArticles((saved as any[]) || []);
-    setPosts((postData as any[]) || []);
+    setSavedArticles((saved as SavedArticle[]) || []);
+    setPosts((postData as PostRow[]) || []);
     setLoading(false);
   };
 
@@ -91,8 +91,8 @@ const GeneratedPosts = () => {
       if (!data?.post?.id) throw new Error("The fake generator did not return a post.");
       toast({ title: "Post generated", description: "The fake Edge Function saved a draft post." });
       await loadData();
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Generation failed", description: err.message || "Unable to generate post." });
+    } catch (err: unknown) {
+      toast({ variant: "destructive", title: "Generation failed", description: err instanceof Error ? err.message : "Unable to generate post." });
     } finally {
       setGeneratingId(null);
     }
@@ -108,7 +108,7 @@ const GeneratedPosts = () => {
     await supabase.from("posts").update({ content: draft }).eq("id", editingPost.id);
     setEditingPost(null);
     const { data } = await supabase.from("posts").select("id, content, ai_content, article_id, status, scheduled_for, articles:article_id(id, title, url, summary, imageurl)").eq("user_id", user!.id).order("created_at", { ascending: false });
-    if (data) setPosts(data as any[]);
+    if (data) setPosts(data as PostRow[]);
     toast({ title: "Changes saved", description: "Your edit has been saved." });
   };
 
@@ -207,7 +207,7 @@ const GeneratedPosts = () => {
               <CardContent className="space-y-3">
                 {scheduled.length === 0 && <p className="text-sm text-muted-foreground">No scheduled posts yet.</p>}
                 {scheduled.map((post) => {
-                  const imageUrl = (post.articles as any)?.imageurl;
+                  const imageUrl = post.articles?.imageurl;
                   return (
                     <div key={post.id} className="border rounded-md overflow-hidden">
                       {imageUrl ? (
