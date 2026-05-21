@@ -146,7 +146,7 @@ Demo users:
 
 Supabase will print the exact local URLs after `supabase start`. Common defaults are:
 
-- App: shown by `npm run dev`, usually `http://localhost:5173`
+- App: `http://localhost:8080` (Vite is configured to use port 8080, not the default 5173)
 - Supabase API: `http://127.0.0.1:54321`
 - Supabase Studio: `http://127.0.0.1:54323`
 
