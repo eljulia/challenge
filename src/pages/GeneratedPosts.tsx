@@ -207,7 +207,7 @@ const GeneratedPosts = () => {
               <CardContent className="space-y-3">
                 {scheduled.length === 0 && <p className="text-sm text-muted-foreground">No scheduled posts yet.</p>}
                 {scheduled.map((post) => {
-                  const imageUrl = (post.articles as any)?.image_url;
+                  const imageUrl = (post.articles as any)?.imageurl;
                   return (
                     <div key={post.id} className="border rounded-md overflow-hidden">
                       {imageUrl ? (
