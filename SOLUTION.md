@@ -117,9 +117,9 @@ El formulario de Onboarding no tiene validacion del lado del cliente mas alla de
 
 Actualmente el usuario tiene que esperar la respuesta de Supabase para ver el cambio reflejado. Implementaria optimistic updates: actualizar el estado local inmediatamente y revertir si la operacion falla. Esto hace que la UI se sienta instantanea.
 
-### 5. Tests de integracion con Playwright
+### 5. Tests de integracion Manual
 
-El flujo de 12 pasos se verifico manualmente con Playwright MCP durante el desarrollo. Lo formalizaria como una suite de tests automatizados que corra en CI para prevenir regresiones en cada PR.
+El flujo de 12 pasos se verifico manualmente durante el desarrollo. Lo formalizaria como una suite de tests automatizados que corra en CI para prevenir regresiones en cada PR.
 
 ### 6. Politica RLS mas granular para el leaderboard
 
